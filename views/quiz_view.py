@@ -28,19 +28,21 @@ class QuizView(BaseView):
 
         # Инициализируем макет, передавая коллбэк и метод кэша
         self.layout: QuizLayout = QuizLayout(
+            width=self.window.width,
+            height=self.window.height,
             on_answer=self._process_answer,
             get_texture_func=self.get_texture  # Прокси из BaseView -> App
         )
         self.ui.add(self.layout)
-
+        self.setup_layout(self.layout)
         self.prepare_question()
 
     def on_update(self, delta_time: float) -> None:
         """Обновление логики таймера и его визуального состояния."""
+        self.timer.on_update(delta_time)
         if self.timer.time_left <= self.timer.total_time * 0.1:
             self.layout.lbl_timer._label.color = arcade.color.RED
         self.layout.lbl_timer.text = self.timer.get_time_str()
-        self.timer.on_update(delta_time)
         if self.timer.is_over():
             self.status = config.STATUS["time_is_over"]
             self._finish()

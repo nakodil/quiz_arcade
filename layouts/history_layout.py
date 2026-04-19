@@ -37,7 +37,20 @@ class HistoryLayout(BaseLayout):
         self.slide: dict | None = None
 
     def _make_header_widgets(self, current_idx: int, total: int) -> None:
-        """Верхний ряд: порядковый номер слада."""
+        """Верхний ряд: заголовок и порядковый номер слада."""
+        # Заголовок
+        title_lbl = self.create_label(
+            text=self.slide["заголовок"],
+            font_size=24,
+            font="title",
+        )
+        self.header_container.add(
+            title_lbl,
+            anchor_x="center",
+            anchor_y="center",
+        )
+
+        # Порядковый номер
         self.lbl_counter = self.create_label(
             f"{current_idx + 1} / {total}",
             font="mono",
@@ -45,7 +58,7 @@ class HistoryLayout(BaseLayout):
         )
         self.header_container.add(
             self.lbl_counter,
-            anchor_x="center",
+            anchor_x="right",
             anchor_y="center",
         )
 
@@ -94,7 +107,7 @@ class HistoryLayout(BaseLayout):
         data_container = arcade.gui.UIBoxLayout(
             size_hint=(width_hint, 1),
             align="left",
-            space_between=10,
+            space_between=self.padding_ver,
         ).with_padding(
             top=0,
             bottom=0,
@@ -110,15 +123,6 @@ class HistoryLayout(BaseLayout):
 
         available_width = self.width * width_hint
         text_width = round(available_width - self.padding_hor - padding_left)
-
-        # Тема
-        title_lbl = self.create_label(
-            text=self.slide["заголовок"],
-            font_size=24,
-            width=text_width,
-            multiline=True,
-        )
-        data_container.add(title_lbl)
 
         # Тема
         topic_lbl = self.create_label(
@@ -170,6 +174,10 @@ class HistoryLayout(BaseLayout):
     ) -> None:
         """Полная сборка/перерисовка слайда."""
         self.slide = slide
+
+        # Вешаем фон из слайда
+        bg_texture = self.get_texture(slide["фон"])
+        self.setup_background(texture=bg_texture)
 
         # Очищаем контейнеры перед новым вопросом
         self.header_container.clear()

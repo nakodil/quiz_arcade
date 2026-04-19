@@ -14,11 +14,15 @@ class QuizLayout(BaseLayout):
 
     def __init__(
             self,
+            width: int,
+            height: int,
             on_answer: Callable,
             get_texture_func: Callable,
     ) -> None:
         """Инициализирует макет викторины."""
         super().__init__(
+            width=width,
+            height=height,
             header_ratio=0.1,
             content_ratio=0.8,
             footer_ratio=0.1,

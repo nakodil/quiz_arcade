@@ -1,19 +1,17 @@
 """Модуль представления индивидуальной статистики."""
 
-import utils
-import config
-from views.base_view import BaseView
 from layouts.finish_layout import FinishLayout
+from views.base_view import BaseView
 
 
 class FinishView(BaseView):
-    """Представление финального экрана (логика сохранения и навигации)."""
+    """Представление финального экрана (+ логика сохранения и навигации)."""
 
     def __init__(self, statistics: dict) -> None:
+        """Инициализирует представление индивидуальной статистики."""
         super().__init__("finish_bg.jpg")
 
-        # Сохраняем персональную статистику в общую
-        utils.save_json(config.STATISTICS_JSON, statistics)
+        self.window.save_new_result(statistics)
 
         # Инициализируем макет и передаем данные
         self.layout = FinishLayout(
@@ -22,6 +20,7 @@ class FinishView(BaseView):
             statistics=statistics,
             on_menu=self.on_menu,
         )
+        self.setup_layout(self.layout)
         self.ui.add(self.layout)
 
     def on_menu(self) -> None:

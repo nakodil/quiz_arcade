@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 import arcade.gui
 
+import utils
 from layouts.base_layout import BaseLayout
 
 
@@ -38,6 +39,8 @@ class FinishLayout(BaseLayout):
         for key, value in statistics.items():
             if key == "статус":
                 continue   # в послендем - статус, он и так в тайтле
+            if key == "потрачено":
+                value = utils.get_formatted_time(value)
             row_text = f"{key}: {value}"
             row = self.create_label(row_text, font_size=22)
             vbox.add(row)

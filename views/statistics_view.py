@@ -2,8 +2,6 @@
 
 import math
 
-import config
-import utils
 from layouts.statistics_layout import StatisticsLayout
 from views.base_view import BaseView
 
@@ -11,12 +9,11 @@ from views.base_view import BaseView
 class StatisticsView(BaseView):
     """Логика пагинации и загрузки данных статистики."""
 
-    def __init__(self) -> None:
+    def __init__(self, data: list) -> None:
         super().__init__("statistics_bg.jpg")
 
-        # Загружаем данные и разворачиваем (свежие сверху)
-        full_data = utils.load_json(config.STATISTICS_JSON)
-        self.data = list(reversed(full_data))
+        # Разворачиваем данные (свежие сверху)
+        self.data = list(reversed(data))
 
         # Настройки пагинации
         self.current_page = 0
@@ -31,11 +28,10 @@ class StatisticsView(BaseView):
             on_prev=self.on_prev,
             on_next=self.on_next,
         )
-        self.ui.add(self.layout)
-
+        self.setup_layout(self.layout)
         self._update_display()
 
-    def _update_display(self):
+    def _update_display(self) -> None:
         """Вычисляет срез данных и просит макет их отрисовать."""
         start = self.current_page * self.items_per_page
         end = start + self.items_per_page
@@ -47,15 +43,18 @@ class StatisticsView(BaseView):
             total_pages=self.total_pages
         )
 
-    def on_next(self):
+    def on_next(self) -> None:
+        """Коллбэк кнопки следующего слайда."""
         if self.current_page < self.total_pages - 1:
             self.current_page += 1
             self._update_display()
 
-    def on_prev(self):
+    def on_prev(self) -> None:
+        """Коллбэк кнопки предыдущего слайда."""
         if self.current_page > 0:
             self.current_page -= 1
             self._update_display()
 
-    def on_menu(self):
+    def on_menu(self) -> None:
+        """Коллбэк кнопки следующего меню."""
         self.window.show_menu()

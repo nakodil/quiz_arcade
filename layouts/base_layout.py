@@ -6,6 +6,7 @@ import arcade
 import arcade.gui
 
 import config
+import utils
 
 
 class BaseLayout(arcade.gui.UIAnchorLayout):
@@ -29,7 +30,14 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
         """
         super().__init__(size_hint=(1, 1), **kwargs)
 
-        # Размер корневого контейнера
+        # Полупрозрачный черный для оверлея
+        self.overlay_color = arcade.color.BLACK.replace(a=230)
+
+        # Контейнер фона
+        self.bg_container = arcade.gui.UIAnchorLayout()
+        self.add(self.bg_container)
+
+        # Размер ?корневого? контейнера
         self.width = width
         self.height = height
 
@@ -121,6 +129,34 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             on_click()
 
         return btn
+
+    def setup_background(
+            self,
+            texture: arcade.Texture,
+    ) -> None:
+        """Метод макета для создания визуальных слоев."""
+        self.bg_container.clear()
+        scale = utils.get_image_scale(
+            texture.width,
+            texture.height,
+            self.width,
+            self.height,
+        )
+        bg_img = arcade.gui.UIImage(
+            texture=texture,
+            width=self.width,
+            height=self.height,
+            scale=scale,
+        )
+        # Изображение
+        self.bg_container.add(bg_img)
+
+        # Оверлей
+        overlay = arcade.gui.UIWidget(
+            width=self.width,
+            height=self.height,
+        ).with_background(color=self.overlay_color)
+        self.bg_container.add(overlay)
 
     def debug_layout(self) -> None:
         """Заливает контейнеры прозрачным цветом."""

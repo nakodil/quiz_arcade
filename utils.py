@@ -49,13 +49,9 @@ def load_json(file_name: str) -> list:
         return []
 
 
-def save_json(file_name: str, new_data: dict) -> None:
-    """Добавляет запись (dict) в json."""
+def write_json(file_name: str, data: list | dict) -> None:
+    """Просто записывает данные в файл, без предварительного чтения."""
     file_path = Path(file_name)
-
-    data = load_json(file_name)
-    data.append(new_data)
-
     with file_path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 

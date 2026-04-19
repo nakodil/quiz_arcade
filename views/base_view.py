@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 import arcade
 import arcade.gui
 
-import utils
 from layouts.base_layout import BaseLayout
 
 
@@ -18,46 +17,37 @@ class BaseView(arcade.View):
     window: "App"
 
     def __init__(self, bg_filename: str | None = None) -> None:
+        """Инициализирует базовое представление."""
         super().__init__()
+        self.bg_filename = bg_filename
         self.ui = arcade.gui.UIManager()
         self.layout: arcade.gui.UIAnchorLayout | None = None
-        self.sprites = arcade.SpriteList()  # Заменить компонентом UI или свойством контейнера
 
-        if bg_filename:
-            self.sprites.append(self._get_bg_sprite(bg_filename))
+    def setup_layout(self, layout: BaseLayout) -> None:
+        """Настраивает макет и вешает на него фон."""
+        self.layout = layout
+        self.ui.add(self.layout)
 
-    def _get_bg_sprite(self, bg_filename: str) -> arcade.Sprite:
-        """Отдает спрайт фона."""
-        texture = self.get_texture(bg_filename)
-        scale = utils.get_image_scale(
-            texture.width,
-            texture.height,
-            self.window.width,
-            self.window.height,
-        )
-        sprite = arcade.Sprite(texture, scale)
-        sprite.center_x, sprite.center_y = self.window.width // 2, self.window.height // 2
-        return sprite
+        if not self.bg_filename:
+            return
+        texture = self.get_texture(self.bg_filename)
+        self.layout.setup_background(texture=texture)
 
     def get_texture(self, filename: str) -> arcade.Texture:
         """Проксирует доступ к кэшу текстур в App."""
         return self.window.get_texture(filename)
 
-    def on_show_view(self):
+    def on_show_view(self) -> None:
+        """Запускает менеджер интерфейса."""
         self.ui.enable()
 
-    def on_hide_view(self):
+    def on_hide_view(self) -> None:
+        """Останавливает менеджер интерфейса."""
         self.ui.disable()
 
-    def on_draw(self):
+    def on_draw(self) -> None:
+        """Очищает окно и рисует весь интерфейс."""
         self.clear()
-        self.sprites.draw()
-
-        # Рисуем оверлей над фоном
-        arcade.draw_lrbt_rectangle_filled(
-            0, self.window.width, 0, self.window.height, (0, 0, 0, 200),
-        )
-
         self.ui.draw()
 
     def on_key_press(self, symbol: int, _: int) -> None:

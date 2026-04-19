@@ -28,6 +28,7 @@ class HistoryView(BaseView):
             on_next=self.on_next,
             get_texture_func=self.get_texture,
         )
+        self.setup_layout(self.layout)
         self.ui.add(self.layout)
         self.setup()
 

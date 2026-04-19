@@ -6,7 +6,6 @@ from views.base_view import BaseView
 
 class MenuView(BaseView):
     def __init__(self) -> None:
-        # Передаем только имя картинки, остальное сделает BaseView
         super().__init__(bg_filename="menu_bg.jpg")
 
         callbacks = {
@@ -21,6 +20,8 @@ class MenuView(BaseView):
             height=self.window.height,
             callbacks=callbacks,
         )
+
+        self.setup_layout(self.layout)
 
         self.ui.add(self.layout)
 
