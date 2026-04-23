@@ -18,3 +18,7 @@ ENV/
 # Windows
 Thumbs.db
 desktop.ini
+
+# Tooling
+ruff.toml
+.ruff_cache/

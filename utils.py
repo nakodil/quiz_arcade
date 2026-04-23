@@ -30,15 +30,13 @@ def get_formatted_time(time: float, sep: str = ":") -> str:
     return f"{hours:02}{sep}{minutes:02}{sep}{seconds:02}"
 
 
-def load_json(file_name: str) -> list:
+def load_json(path: Path) -> list:
     """Безопасно загружает JSON как список."""
-    file_path = Path(file_name)
-
-    if not file_path.exists() or file_path.stat().st_size == 0:
+    if not path.exists() or path.stat().st_size == 0:
         return []
 
     try:
-        with file_path.open("r", encoding="utf-8") as f:
+        with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
 
             if isinstance(data, list):
@@ -49,10 +47,9 @@ def load_json(file_name: str) -> list:
         return []
 
 
-def write_json(file_name: str, data: list | dict) -> None:
-    """Просто записывает данные в файл, без предварительного чтения."""
-    file_path = Path(file_name)
-    with file_path.open("w", encoding="utf-8") as f:
+def write_json(path: Path, data: list | dict) -> None:
+    """Записывает данные в JSON."""
+    with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
