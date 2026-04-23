@@ -1,5 +1,7 @@
 """Модуль макета меню."""
 
+from collections.abc import Callable
+
 import arcade.gui
 
 import config
@@ -11,27 +13,24 @@ class MenuLayout(BaseLayout):
 
     def __init__(
             self,
-            width: int,
-            height: int,
-            callbacks: dict,
+            size: tuple[int, int],
+            callbacks: dict[str, Callable] | None = None,
     ) -> None:
         """Инициализирует макет меню."""
         super().__init__(
-            width=width,
-            height=height,
-            header_ratio=0.1,
-            content_ratio=0.8,
-            footer_ratio=0.1,
+            size=size,
+            propotrions=(0.1, 0.8, 0.1),
+            callbacks=callbacks,
         )
-        self._setup_ui(callbacks)
+        self._setup_ui()
 
-    def _setup_ui(self, callbacks: dict) -> None:
+    def _setup_ui(self) -> None:
         """Создание интерфейса."""
         # Название посередине ряда контента
         title = self.create_label(
             text=config.TITLE,
-            font_size=54,
             font="main",
+            font_size=config.FS_LARGE,
         )
         self.content_container.add(
             title,
@@ -45,12 +44,11 @@ class MenuLayout(BaseLayout):
             space_between=20,
         )
 
-        # Описываем структуру кнопок
+        # Названия кнопок и их коллбэки
         menu_items = [
-            ("ВЫХОД", callbacks["exit"]),
-            ("ИСТОРИЯ", callbacks["history"]),
-            ("СТАТИСТИКА", callbacks["stats"]),
-            ("ВИКТОРИНА", callbacks["quiz"]),
+            ("ИСТОРИЯ", self.callbacks["history"]),
+            ("СТАТИСТИКА", self.callbacks["statistics"]),
+            ("ВИКТОРИНА", self.callbacks["quiz"]),
         ]
 
         # Создаем кнопки и кладем их в свой контейнер

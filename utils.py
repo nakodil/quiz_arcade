@@ -60,20 +60,25 @@ class Timer:
     """Таймер обратного отсчета."""
 
     def __init__(self, time_left: int = 300) -> None:
+        """Инициализирует таймер."""
         self.total_time = time_left
         self.time_left = self.total_time
         self.color = "normal"
+        self.is_over = False
 
     def setup(self) -> None:
+        """Исходное состояние."""
+        self.is_over = False
         self.time_left = self.total_time
 
     def on_update(self, delta_time: float) -> None:
+        """Отнимает время и задает цвет цифр."""
         self.time_left -= delta_time
         if self.time_left <= self.total_time * 0.1:
             self.color = "warning"
+        if self.time_left <= 0:
+            self.is_over = True
 
     def get_time_str(self) -> str:
+        """Отдает время в формате ЧЧ:ММ:СС."""
         return get_formatted_time(self.time_left)
-
-    def is_over(self) -> bool:
-        return self.time_left <= 0

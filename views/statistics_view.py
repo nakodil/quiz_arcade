@@ -2,18 +2,23 @@
 
 import math
 
-from layouts.statistics_layout import StatisticsLayout
-from views.base_view import BaseView
+from layouts import StatisticsLayout
+from views import BaseView
 
 
 class StatisticsView(BaseView):
-    """Логика пагинации и загрузки данных статистики."""
+    """Общая статистика."""
+
+    layout: StatisticsLayout
 
     def __init__(self, data: list) -> None:
+        """Инициализирует представление статистики."""
         super().__init__("statistics_bg.jpg")
 
-        # Разворачиваем данные (свежие сверху)
+        # Данные: сортировка от новых к старым
         self.data = list(reversed(data))
+        self.avg_stats = {}
+        self._set_avg_stats()
 
         # Настройки пагинации
         self.current_page = 0
@@ -21,15 +26,41 @@ class StatisticsView(BaseView):
         self.total_pages = math.ceil(len(self.data) / self.items_per_page)
 
         # Создаем макет
+        additional_callbacks = {
+            "prev page": self.on_prev,
+            "next page": self.on_next,
+        }
+        self.callbacks.update(additional_callbacks)
         self.layout = StatisticsLayout(
-            width=self.window.width,
-            height=self.window.height,
-            on_menu=self.on_menu,
-            on_prev=self.on_prev,
-            on_next=self.on_next,
+            size=(self.window.width, self.window.height),
+            callbacks=self.callbacks,
+            avg_stats=self.avg_stats,
         )
         self.setup_layout(self.layout)
         self._update_display()
+
+    def _set_avg_stats(self) -> None:
+        """Записывает средние значения статистики в атрибуты."""
+        # Вычисляем средние значения показателей из каждой записи статистики
+        total_records = len(self.data)
+        if total_records > 0:
+            avg_correct = sum(
+                row.get("верно", 0) for row in self.data
+            ) / total_records
+            avg_incorrect = sum(
+                row.get("ошибки", 0) for row in self.data
+            ) / total_records
+            avg_time = sum(
+                row.get("потрачено", 0) for row in self.data
+            ) / total_records
+        else:
+            avg_correct = avg_incorrect = avg_time = 0
+
+        self.avg_stats = {
+            "avg_correct": round(avg_correct, 1),
+            "avg_incorrect": round(avg_incorrect, 1),
+            "avg_time": avg_time,
+        }
 
     def _update_display(self) -> None:
         """Вычисляет срез данных и просит макет их отрисовать."""
@@ -40,7 +71,8 @@ class StatisticsView(BaseView):
         self.layout.render_page(
             records=page_data,
             page_num=self.current_page,
-            total_pages=self.total_pages
+            total_pages=self.total_pages,
+            avg_stats=self.avg_stats,
         )
 
     def on_next(self) -> None:

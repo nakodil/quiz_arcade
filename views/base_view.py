@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 import arcade
 import arcade.gui
 
-from layouts.base_layout import BaseLayout
+from layouts import BaseLayout
 
 
 class BaseView(arcade.View):
@@ -21,11 +21,21 @@ class BaseView(arcade.View):
         super().__init__()
         self.bg_filename = bg_filename
         self.ui = arcade.gui.UIManager()
-        self.layout: arcade.gui.UIAnchorLayout | None = None
+        self.layout: BaseLayout | None = None
+        self.callbacks = {
+            "exit": self.window.exit,
+            "menu": self.window.show_menu,
+            "quiz": self.window.show_quiz,
+            "statistics": self.window.show_statistics,
+            "finish": self.window.show_finish,
+            "history": self.window.show_history,
+            "sound": self.window.on_sound_toggle,
+        }
 
     def setup_layout(self, layout: BaseLayout) -> None:
         """Настраивает макет и вешает на него фон."""
         self.layout = layout
+        self.layout.make_required_buttons()
         self.ui.add(self.layout)
 
         if not self.bg_filename:

@@ -4,11 +4,14 @@ from typing import TYPE_CHECKING
 
 import arcade
 
+import config
+
 if TYPE_CHECKING:
     from main import App
 
+
 class LoadingView(arcade.View):
-    """Экран загрузки с использованием одного объекта текста."""
+    """Представление загрузки: макет реализован прямо в предстявлени."""
 
     window: "App"
 
@@ -17,28 +20,30 @@ class LoadingView(arcade.View):
         super().__init__()
         self.progress = 0.0
         self.loader = self.window.preload_assets_gen()
+        self.loading_lbl: arcade.Text
+        self.setup()
 
-        # Создаем один объект текста раз и навсегда
-        self.label = arcade.Text(
-            text="ЗАГРУЗКА: 0%",
+    def setup(self) -> None:
+        """Создает элементы интерфейса."""
+        self.loading_lbl = arcade.Text(
+            text=f"загрузка: {int(self.progress * 100)}%",
             x=self.window.width // 2,
             y=self.window.height // 2,
             color=arcade.color.WHITE,
-            font_size=30,
+            font_size=config.FS_XXL,
             anchor_x="center",
             anchor_y="center",
         )
 
     def on_update(self, _: float) -> None:
-        """Обновляем только текст объекта."""
+        """Обновление текста загрузки."""
         try:
             self.progress = next(self.loader)
-            # Просто меняем атрибут
-            self.label.text = f"ЗАГРУЗКА: {int(self.progress * 100)}%"
+            self.loading_lbl.text = f"загрузка: {int(self.progress * 100)}%"
         except StopIteration:
-            self.window.show_menu()
+            self.window.on_loading_finish()
 
     def on_draw(self) -> None:
-        """Рендер."""
+        """Очищает окно и рисует текст посередине."""
         self.clear()
-        self.label.draw()
+        self.loading_lbl.draw()

@@ -1,32 +1,33 @@
 """Модуль представления истории."""
 
-from layouts.history_layout import HistoryLayout
-from views.base_view import BaseView
+from layouts import HistoryLayout
+from views import BaseView
 
 
 class HistoryView(BaseView):
     """Представление для экрана истории (слайды)."""
 
+    layout: HistoryLayout
+
     def __init__(
             self,
             slides_data: list[dict],
     ) -> None:
-        """Инициализирует представление истории.
-
-        Args:
-            slides_data: Список словарей с данными слайдов.
-            menu_view: Коллбэк кнопки меню
-        """
+        """Инициализирует представление истории."""
         super().__init__(bg_filename="history_bg.jpg")
         self.slides = slides_data
         self.current_idx = 0
+
+        # Создаем макет
+        additional_callbacks = {
+            "get texture": self.window.get_texture,
+            "on prev": self.on_prev,
+            "on next": self.on_next,
+        }
+        self.callbacks.update(additional_callbacks)
         self.layout: HistoryLayout = HistoryLayout(
-            width=self.window.width,
-            height=self.window.height,
-            on_menu=self.on_menu,
-            on_prev=self.on_prev,
-            on_next=self.on_next,
-            get_texture_func=self.get_texture,
+            size=(self.window.width, self.window.height),
+            callbacks=self.callbacks,
         )
         self.setup_layout(self.layout)
         self.ui.add(self.layout)
@@ -60,7 +61,3 @@ class HistoryView(BaseView):
         if self.current_idx < len(self.slides) - 1:
             self.current_idx += 1
             self.update_slide_view()
-
-    def on_menu(self) -> None:
-        """Коллбэк кнопки меню."""
-        self.window.show_menu()

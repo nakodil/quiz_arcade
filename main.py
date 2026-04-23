@@ -27,6 +27,7 @@ class App(arcade.Window):
         self.questions = questions
         self.slides = history
         self.player = SoundManager()
+        self.player.is_mute = True  # del on prod!
         self.timer = Timer(config.TIME_LEFT_SEC)  # проксируется в BaseView
         self.texture_cache: dict[str, arcade.Texture] = {}
         self.font_cache: dict[str, arcade.Texture] = {}
@@ -41,6 +42,20 @@ class App(arcade.Window):
         """Переходит к представлению загрузки."""
         view = LoadingView()
         self.show_view(view)
+
+    def on_loading_finish(self) -> None:
+        """Включает музыку и показывает представление меню."""
+        if not self.player.is_mute:
+            self.player.play("music", is_loop=True)
+        self.show_menu()
+
+    def on_sound_toggle(self) -> None:
+        """Коллбэк кнопки ВКЛ/ОТКЛ звука."""
+        is_mute = self.player.toggle_mute()
+        if is_mute:
+            self.player.stop_all()
+        else:
+            self.player.play("music", is_loop=True)
 
     def show_menu(self) -> None:
         """Переходит к представлению меню."""
@@ -93,11 +108,12 @@ class App(arcade.Window):
 
         """
         # Загрузка шрифтов
-        font_files = [f for f in config.FONT_DIR.iterdir() if f.suffix.lower() == ".ttf"]
+        font_files = [
+            f for f in config.FONT_DIR.iterdir()
+            if f.suffix.lower() == ".ttf"
+        ]
         for file in font_files:
-            # arcade.load_font возвращает имя семейства
-            family = arcade.load_font(str(file))
-            # Можно сопоставить имя файла и семейство, если нужно
+            arcade.load_font(str(file))
             yield 0.05
 
         # 2. Загрузка текстур

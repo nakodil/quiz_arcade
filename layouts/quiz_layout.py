@@ -5,6 +5,7 @@ from collections.abc import Callable
 import arcade
 import arcade.gui
 
+import config
 import utils
 from layouts.base_layout import BaseLayout
 
@@ -14,45 +15,40 @@ class QuizLayout(BaseLayout):
 
     def __init__(
             self,
-            width: int,
-            height: int,
-            on_answer: Callable,
-            get_texture_func: Callable,
+            size: tuple[int, int],
+            callbacks: dict[str, Callable] | None = None,
     ) -> None:
         """Инициализирует макет викторины."""
         super().__init__(
-            width=width,
-            height=height,
-            header_ratio=0.1,
-            content_ratio=0.8,
-            footer_ratio=0.1,
+            size=size,
+            propotrions=(0.1, 0.8, 0.1),
+            callbacks=callbacks,
         )
-        self.on_answer: Callable = on_answer
-        self.get_texture: Callable = get_texture_func
         self.lbl_timer: arcade.gui.UILabel | None = None
         self.lbl_counter: arcade.gui.UILabel | None = None
-        self.question: dict | None = None
-        self.answer_map: dict | None = None
+        self.question = {}
+        self.answer_map = {}
 
     def update_timer(self, time_str: str, color_type: str) -> None:
         """Обновляет текст и цвет таймера."""
-        if self.lbl_timer:
-            self.lbl_timer.text = time_str
-            if color_type == "warning":
-                self.lbl_timer.update_font(font_color=arcade.color.RED)
+        if not self.lbl_timer:
+            return
+
+        self.lbl_timer.text = time_str
+        if color_type == "warning":
+            self.lbl_timer.update_font(font_color=arcade.color.RED)
 
     def _make_header_widgets(self, current_idx: int, total: int) -> None:
         """Верхний ряд: порядковый номер вопроса и таймер."""
-
         # Порядковый номер вопроса
         self.lbl_counter = self.create_label(
             f"{current_idx + 1} / {total}",
             font="mono",
-            font_size=16,
+            font_size=config.FS_MEDIUM,
         )
         self.header_container.add(
             self.lbl_counter,
-            anchor_x="center",
+            anchor_x="right",
             anchor_y="center",
         )
 
@@ -60,11 +56,11 @@ class QuizLayout(BaseLayout):
         self.lbl_timer = self.create_label(
             "",
             font="mono",
-            font_size=16,
+            font_size=config.FS_MEDIUM,
         )
         self.header_container.add(
             self.lbl_timer,
-            anchor_x="right",
+            anchor_x="center",
             anchor_y="center",
         )
 
@@ -87,7 +83,9 @@ class QuizLayout(BaseLayout):
         )
 
         # Изображение
-        texture = self.get_texture(self.question["изображение"])
+        image_filename = self.question["изображение"]
+        texture_getter = self.callbacks["get texture"]
+        texture = texture_getter(image_filename)
         image_max_w = round(self.width * 0.5 - self.padding_hor * 2)
         image_max_h = round(self.height * self.content_ratio - self.padding_ver)
         scale = utils.get_image_scale(
@@ -131,18 +129,18 @@ class QuizLayout(BaseLayout):
         text_width = round(available_width - self.padding_hor - padding_left)
         text_lbl = self.create_label(
             text=self.question["текст"],
-            font_size=24,
             width=text_width,
             multiline=True,
+            font_size=config.FS_SMALL,
         )
         question_container.add(text_lbl)
 
         for letter, text in self.answer_map.items():
             option_lbl = self.create_label(
                 text=f"{letter}. {text}",
-                font_size=18,
                 width=text_width,
                 multiline=True,
+                font_size=config.FS_SMALL,
             )
             question_container.add(option_lbl)
 
@@ -151,7 +149,7 @@ class QuizLayout(BaseLayout):
         btn_box = arcade.gui.UIBoxLayout(vertical=False, space_between=20)
         for letter in self.answer_map:
             btn = self.create_button(
-                on_click=lambda l=letter: self.on_answer(l),
+                on_click=lambda l=letter: self.callbacks["on answer"](l),
                 text=letter,
                 width=100,
             )
@@ -187,7 +185,7 @@ class QuizLayout(BaseLayout):
             )
         else:
             self._make_question_content(
-                width_hint=1, padding_left=0,
+                width_hint=1, padding_left=self.padding_hor,
             )
 
         self._make_footer()

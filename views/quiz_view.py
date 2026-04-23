@@ -4,17 +4,18 @@ import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-import arcade
-
 import config
-from layouts.quiz_layout import QuizLayout
-from views.base_view import BaseView
+from layouts import QuizLayout
+from views import BaseView
 
 
 class QuizView(BaseView):
     """Представление викторины (логика игры)."""
 
+    layout: QuizLayout
+
     def __init__(self, questions: list[dict]) -> None:
+        """Инициализирует представление викторины."""
         super().__init__("quiz_bg.jpg")
 
         self.questions = questions
@@ -26,12 +27,15 @@ class QuizView(BaseView):
         self.status = config.STATUS["interrupted"]
         self.timer = self.window.timer
 
-        # Инициализируем макет, передавая коллбэк и метод кэша
+        # Создаем макет
+        additional_callbacks = {
+            "get texture": self.window.get_texture,
+            "on answer": self.on_answer,
+        }
+        self.callbacks.update(additional_callbacks)
         self.layout: QuizLayout = QuizLayout(
-            width=self.window.width,
-            height=self.window.height,
-            on_answer=self._process_answer,
-            get_texture_func=self.get_texture  # Прокси из BaseView -> App
+            size=(self.window.width, self.window.height),
+            callbacks=self.callbacks,
         )
         self.ui.add(self.layout)
         self.setup_layout(self.layout)
@@ -40,10 +44,9 @@ class QuizView(BaseView):
     def on_update(self, delta_time: float) -> None:
         """Обновление логики таймера и его визуального состояния."""
         self.timer.on_update(delta_time)
-        if self.timer.time_left <= self.timer.total_time * 0.1:
-            self.layout.lbl_timer._label.color = arcade.color.RED
-        self.layout.lbl_timer.text = self.timer.get_time_str()
-        if self.timer.is_over():
+        time_str = self.timer.get_time_str()
+        self.layout.update_timer(time_str, self.timer.color)
+        if self.timer.is_over:
             self.status = config.STATUS["time_is_over"]
             self._finish()
 
@@ -65,7 +68,7 @@ class QuizView(BaseView):
             total=len(self.questions),
         )
 
-    def _process_answer(self, letter: str) -> None:
+    def on_answer(self, letter: str) -> None:
         """Коллбек для кнопок с вариантом ответа."""
         if self.question_index >= len(self.questions):
             return

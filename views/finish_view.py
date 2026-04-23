@@ -1,11 +1,13 @@
 """Модуль представления индивидуальной статистики."""
 
-from layouts.finish_layout import FinishLayout
-from views.base_view import BaseView
+from layouts import FinishLayout
+from views import BaseView
 
 
 class FinishView(BaseView):
     """Представление финального экрана (+ логика сохранения и навигации)."""
+
+    layout: FinishLayout
 
     def __init__(self, statistics: dict) -> None:
         """Инициализирует представление индивидуальной статистики."""
@@ -15,10 +17,9 @@ class FinishView(BaseView):
 
         # Инициализируем макет и передаем данные
         self.layout = FinishLayout(
-            width=self.window.width,
-            height=self.window.height,
+            size=(self.window.width, self.window.height),
+            callbacks=self.callbacks,
             statistics=statistics,
-            on_menu=self.on_menu,
         )
         self.setup_layout(self.layout)
         self.ui.add(self.layout)

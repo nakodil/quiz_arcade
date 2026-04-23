@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 import arcade.gui
 
+import config
 import utils
 from layouts.base_layout import BaseLayout
 
@@ -13,33 +14,68 @@ class StatisticsLayout(BaseLayout):
 
     def __init__(
             self,
-            width: int,
-            height: int,
-            on_menu: Callable,
-            on_prev: Callable,
-            on_next: Callable,
+            size: tuple[int, int],
+            callbacks: dict[str, Callable],
+            avg_stats: dict,
     ) -> None:
-        """Инициализирует макет с пагинацией."""
+        """Инициализирует макет статистики."""
         super().__init__(
-            width=width,
-            height=height,
-            header_ratio=0.1,
-            content_ratio=0.8,
-            footer_ratio=0.1,
+            size=size,
+            propotrions=(0.1, 0.8, 0.1),
+            callbacks=callbacks,
         )
-        self.on_menu = on_menu
-        self.on_prev = on_prev
-        self.on_next = on_next
 
-    def render_page(self, records: list, page_num: int, total_pages: int):
+    def render_page(
+            self,
+            records: list,
+            page_num: int,
+            total_pages: int,
+            avg_stats: dict,
+    ) -> None:
         """Отрисовывает конкретную страницу данных."""
         self.header_container.clear()
         self.content_container.clear()
         self.footer_container.clear()
 
-        # Заголовок
-        title = self.create_label("Статистика", font_size=40, font="title")
-        self.header_container.add(title, anchor_x="center", anchor_y="center")
+        self.make_required_buttons()
+        # Вертикальный бокс для заголовка и статистики
+        header_vbox = arcade.gui.UIBoxLayout(vertical=True, space_between=5)
+
+        # Главный заголовок
+        title = self.create_label(
+            "Статистика",
+            font="title",
+            font_size=config.FS_MEDIUM,
+        )
+        header_vbox.add(title)
+
+        # Строка общей статистики (если есть записи)
+        if records:
+            avg_time_str = utils.get_formatted_time(int(avg_stats["avg_time"]))
+            stats_text = (
+                f"В среднем: ✔ {avg_stats["avg_correct"]} | "
+                f"❌ {avg_stats["avg_incorrect"]} | "
+                f"⏳ {avg_time_str}"
+            )
+            stats_label = self.create_label(
+                stats_text,
+                font_size=config.FS_SMALL,
+            )
+            header_vbox.add(stats_label)
+
+        # Добавляем весь блок заголовков в хедер-контейнер
+        self.header_container.add(header_vbox, anchor_x="center", anchor_y="center")
+
+        # Порядковый номер страницы
+        page_info = self.create_label(
+            f"{page_num + 1} / {total_pages}",
+            font_size=config.FS_SMALL,
+        )
+        self.header_container.add(
+            page_info,
+            anchor_x="right",
+            anchor_y="center",
+        )
 
         # Форматированные элементы статистики
         vbox = arcade.gui.UIBoxLayout(space_between=10, align="left")
@@ -47,7 +83,7 @@ class StatisticsLayout(BaseLayout):
         if not records:
             empty_lbl = self.create_label(
                 "Статистики пока нет. Пройдите викторину первым;)",
-                font_size=24,
+                font_size=config.FS_SMALL,
             )
             vbox.add(empty_lbl)
         else:
@@ -63,32 +99,27 @@ class StatisticsLayout(BaseLayout):
         # Кнопки пагинации
         if total_pages > 1:
             btn_prev = self.create_button(
-                on_click=self.on_prev,
+                on_click=self.callbacks["prev page"],
                 text="<",
                 width=60,
             )
-            btn_next = self.create_button(
-                on_click=self.on_next,
-                text=">",
-                width=60,
-            )
-
-            page_info = self.create_label(
-                f"{page_num + 1} / {total_pages}",
-                font_size=18,
-            )
-
             navigation_container.add(btn_prev)
-            navigation_container.add(page_info)
-            navigation_container.add(btn_next)
 
-        # Кнопка меню
         btn_menu = self.create_button(
-            on_click=self.on_menu,
+            on_click=self.callbacks["menu"],
             text="МЕНЮ",
             width=150,
         )
         navigation_container.add(btn_menu)
+
+        if total_pages > 1:
+            btn_next = self.create_button(
+                on_click=self.callbacks["next page"],
+                text=">",
+                width=60,
+            )
+            navigation_container.add(btn_next)
+
         self.footer_container.add(
             navigation_container,
             anchor_x="center",
@@ -107,7 +138,7 @@ class StatisticsLayout(BaseLayout):
         time_spent = utils.get_formatted_time(record.get("потрачено", 0))
         status = record.get("статус", "")
         text = (
-            f"{num:02}. | {dt} | ✔{correct} | ✖{incorrect} | "
-            f"⏳ {time_spent} | {status}"
+            f"{num:02}. | {dt} | ✔{correct} | ❌{incorrect} | "
+            f"{time_spent}⏳ | {status}"
         )
-        return self.create_label(text=text, font_size=18)
+        return self.create_label(text=text, font_size=config.FS_SMALL)

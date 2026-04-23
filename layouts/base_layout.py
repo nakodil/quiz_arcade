@@ -8,54 +8,91 @@ import arcade.gui
 import config
 import utils
 
+BUTTON_STYLE = {
+    "normal": arcade.gui.UIFlatButton.UIStyle(
+        font_size=config.FS_S,
+        font_name=(config.FONTS["button"], "arial"),
+        font_color=arcade.color.WHITE,
+        bg=arcade.types.Color(0, 0, 100, 100),
+        border=arcade.color.WHITE,
+        border_width=1,
+    ),
+    "press": arcade.gui.UIFlatButton.UIStyle(
+        font_size=config.FS_S,
+        font_name=(config.FONTS["button"], "arial"),
+        font_color=arcade.color.WHITE,
+        bg=arcade.types.Color(0, 0, 100, 100),
+        border=arcade.color.WHITE,
+        border_width=1,
+    ),
+    "hover": arcade.gui.UIFlatButton.UIStyle(
+        font_size=config.FS_S,
+        font_name=(config.FONTS["button"], "arial"),
+        font_color=arcade.color.WHITE,
+        bg=arcade.types.Color(128, 128, 128, 150),
+        border=arcade.color.WHITE,
+        border_width=2,
+    ),
+    "disabled": arcade.gui.UIFlatButton.UIStyle(
+        font_size=config.FS_S,
+        font_name=(config.FONTS["button"], "arial"),
+        font_color=arcade.color.WHITE,
+        bg=arcade.types.Color(128, 128, 128, 100),
+        border=arcade.color.WHITE,
+        border_width=0,
+    ),
+}
+
 
 class BaseLayout(arcade.gui.UIAnchorLayout):
     """Базовый макет."""
 
     def __init__(
             self,
-            width: int = 1920,
-            height: int = 1080,
-            header_ratio: float | None = 0.05,
-            content_ratio: float | None = 0.9,
-            footer_ratio: float | None = 0.05,
-            **kwargs,
+            size: tuple[int, int] = (1920, 1080),
+            propotrions: tuple[float, float, float] = (0.05, 0.9, 0.05),
+            callbacks: dict[str, Callable] | None = None,
     ) -> None:
         """Инициализирует базовый макет.
 
-        Обертка по размеру корневого контейнера (элементы - вертикально)
-            Верний ряд (5% высоты)
-            Средний ряд (90% высоты)
-            Нижний ряд (5% высоты)
+        Слои:
+            Контейнер фона
+            Обертка по размеру корневого контейнера (элементы - вертикально)
+                Верний ряд (5% высоты)
+                Средний ряд (90% высоты)
+                Нижний ряд (5% высоты)
         """
-        super().__init__(size_hint=(1, 1), **kwargs)
-
-        # Полупрозрачный черный для оверлея
-        self.overlay_color = arcade.color.BLACK.replace(a=230)
+        super().__init__(size_hint=(1, 1))
+        if callbacks:
+            self.callbacks = callbacks
+        else:
+            self.callbacks = {}
+        self.sound_btn: arcade.gui.UIFlatButton | None = None
+        self.exit_btn: arcade.gui.UIFlatButton | None = None
 
         # Контейнер фона
         self.bg_container = arcade.gui.UIAnchorLayout()
         self.add(self.bg_container)
 
         # Размер ?корневого? контейнера
-        self.width = width
-        self.height = height
+        self.width = size[0]
+        self.height = size[1]
 
         # Пропорции высоты рядов
-        self.header_ratio = header_ratio
-        self.content_ratio = content_ratio
-        self.footer_ratio = footer_ratio
+        self.header_ratio = propotrions[0]
+        self.content_ratio = propotrions[1]
+        self.footer_ratio = propotrions[2]
 
         # Отступы
         self.padding_hor = round(self.width * 0.01)
         self.padding_ver = self.padding_hor
 
-        # Обертка
+        # Обертка рядов
         self.body_container = arcade.gui.UIBoxLayout(
             size_hint=(1, 1), vertical=True,
         )
 
-        # Верхний ряд обертки
+        # Верхний ряд обертки (хэдер)
         self.header_container = arcade.gui.UIAnchorLayout(
             size_hint=(1, self.header_ratio),
         ).with_padding(
@@ -65,7 +102,7 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             right=self.padding_hor,
         )
 
-        # Средний ряд обертки
+        # Средний ряд обертки (контент)
         self.content_container = arcade.gui.UIAnchorLayout(
             size_hint=(1, self.content_ratio),
         ).with_padding(
@@ -75,7 +112,7 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             right=self.padding_hor,
         )
 
-        # Нижний ряд обертки
+        # Нижний ряд обертки (футер)
         self.footer_container = arcade.gui.UIAnchorLayout(
             size_hint=(1, self.footer_ratio),
         ).with_padding(
@@ -90,13 +127,13 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
         self.body_container.add(self.content_container)
         self.body_container.add(self.footer_container)
 
-        # Добавляем обертку
+        # Добавляем обертку в корневой контейнер
         self.add(self.body_container)
 
     def create_label(
             self,
             text: str = "",
-            font_size: int = 20,
+            font_size: int = config.FS_SMALL,
             font: str = "text",
             **kwargs,
     ) -> arcade.gui.UILabel:
@@ -121,6 +158,7 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             text=text,
             width=width,
             height=height,
+            style=BUTTON_STYLE,
         )
 
         @btn.event("on_click")
@@ -134,8 +172,15 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             self,
             texture: arcade.Texture,
     ) -> None:
-        """Метод макета для создания визуальных слоев."""
+        """Создает фон из слоев.
+
+        Каждый слой - контейнер:
+            1. Слой заливки цветом - оверлей
+            2. Слой изображения
+        """
         self.bg_container.clear()
+
+        # Изображение
         scale = utils.get_image_scale(
             texture.width,
             texture.height,
@@ -148,18 +193,47 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             height=self.height,
             scale=scale,
         )
-        # Изображение
         self.bg_container.add(bg_img)
 
-        # Оверлей
+        # Оверлей (заливка поверх изображения фона)
+        overlay_color = arcade.color.BLACK.replace(a=config.OVERLAY_ALPHA)
         overlay = arcade.gui.UIWidget(
             width=self.width,
             height=self.height,
-        ).with_background(color=self.overlay_color)
+        ).with_background(color=overlay_color)
         self.bg_container.add(overlay)
 
+    def make_required_buttons(self) -> None:
+        """Создает обязательные кнопки по бокам футера.
+
+        Кнопки:
+            ВКЛ/ОТКЛ звука справа
+            ВЫХОД слева
+        """
+        # Выход
+        self.exit_btn = self.create_button(
+            self.callbacks["exit"],
+            "ВЫХОД",
+        )
+        self.footer_container.add(
+            self.exit_btn,
+            anchor_x="left",
+            anchor_y="center",
+        )
+
+        # ВКЛ/ОТКЛ звука
+        self.sound_btn = self.create_button(
+            self.callbacks["sound"],
+            "ВЫКЛ ЗВУК",
+        )
+        self.footer_container.add(
+            self.sound_btn,
+            anchor_x="right",
+            anchor_y="center",
+        )
+
     def debug_layout(self) -> None:
-        """Заливает контейнеры прозрачным цветом."""
+        """Заливает ряды обертки прозрачным цветом."""
         self.header_container = self.header_container.with_background(
             color=arcade.color.RED.replace(a=100),
         )

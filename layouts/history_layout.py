@@ -5,6 +5,7 @@ from collections.abc import Callable
 import arcade
 import arcade.gui
 
+import config
 import utils
 from layouts.base_layout import BaseLayout
 
@@ -14,35 +15,25 @@ class HistoryLayout(BaseLayout):
 
     def __init__(
             self,
-            width: int,
-            height: int,
-            on_menu: Callable,
-            on_prev: Callable,
-            on_next: Callable,
-            get_texture_func: Callable,
+            size: tuple[int, int],
+            callbacks: dict[str, Callable] | None = None,
     ) -> None:
         """Инициализирует макет истории."""
         super().__init__(
-            width=width,
-            height=height,
-            header_ratio=0.1,
-            content_ratio=0.8,
-            footer_ratio=0.1,
+            size=size,
+            propotrions=(0.1, 0.8, 0.1),
+            callbacks=callbacks,
         )
-        self.on_menu = on_menu
-        self.on_prev = on_prev
-        self.on_next = on_next
-        self.get_texture: Callable = get_texture_func
         self.lbl_counter: arcade.gui.UILabel | None = None
-        self.slide: dict | None = None
+        self.slide = {}
 
-    def _make_header_widgets(self, current_idx: int, total: int) -> None:
+    def _make_content_widgets(self, current_idx: int, total: int) -> None:
         """Верхний ряд: заголовок и порядковый номер слада."""
         # Заголовок
         title_lbl = self.create_label(
             text=self.slide["заголовок"],
-            font_size=24,
             font="title",
+            font_size=config.FS_MEDIUM,
         )
         self.header_container.add(
             title_lbl,
@@ -54,7 +45,7 @@ class HistoryLayout(BaseLayout):
         self.lbl_counter = self.create_label(
             f"{current_idx + 1} / {total}",
             font="mono",
-            font_size=16,
+            font_size=config.FS_MEDIUM,
         )
         self.header_container.add(
             self.lbl_counter,
@@ -81,7 +72,9 @@ class HistoryLayout(BaseLayout):
         )
 
         # Изображение
-        texture = self.get_texture(self.slide["изображение"])
+        imgage_filename = self.slide["изображение"]  # DRY: дальше такая же логика, как в QuizView
+        texture_getter = self.callbacks["get texture"]
+        texture = texture_getter(imgage_filename)
         image_max_w = round(self.width * 0.5 - self.padding_hor * 2)
         image_max_h = round(self.height * self.content_ratio - self.padding_ver)
         scale = utils.get_image_scale(
@@ -127,28 +120,43 @@ class HistoryLayout(BaseLayout):
         # Тема
         topic_lbl = self.create_label(
             text=self.slide["тема"],
-            font_size=24,
             width=text_width,
             multiline=True,
+            font_size=config.FS_MEDIUM,
         )
         data_container.add(topic_lbl)
 
         # Текст
         text_lbl = self.create_label(
             text=self.slide["текст"],
-            font_size=24,
             width=text_width,
             multiline=True,
+            font_size=config.FS_SMALL,
         )
         data_container.add(text_lbl)
 
     def _make_footer(self, total_pages: int) -> None:
         """Нижний ряд: кнопки пагинации и кнопка меню."""
-        navigation_container = arcade.gui.UIBoxLayout(vertical=False, space_between=20)
+        self.make_required_buttons()
+        navigation_container = arcade.gui.UIBoxLayout(
+            vertical=False,
+            space_between=20,
+        )
 
-        btn_prev = self.create_button(on_click=self.on_prev, text="<", width=60)
-        btn_menu = self.create_button(on_click=self.on_menu, text="В МЕНЮ")
-        btn_next = self.create_button(on_click=self.on_next, text=">", width=60)
+        btn_prev = self.create_button(
+            on_click=self.callbacks["on prev"],
+            text="<",
+            width=60,
+        )
+        btn_menu = self.create_button(
+            on_click=self.callbacks["menu"],
+            text="В МЕНЮ",
+        )
+        btn_next = self.create_button(
+            on_click=self.callbacks["on next"],
+            text=">",
+            width=60,
+        )
 
         # Добавляем кнопку "назад", если страниц больше одной
         if total_pages > 1:
@@ -175,8 +183,10 @@ class HistoryLayout(BaseLayout):
         """Полная сборка/перерисовка слайда."""
         self.slide = slide
 
-        # Вешаем фон из слайда
-        bg_texture = self.get_texture(slide["фон"])
+        # У каждого слайда свой фон
+        bg_filename = slide["фон"]
+        texture_getter = self.callbacks["get texture"]
+        bg_texture = texture_getter(bg_filename)
         self.setup_background(texture=bg_texture)
 
         # Очищаем контейнеры перед новым вопросом
@@ -184,7 +194,7 @@ class HistoryLayout(BaseLayout):
         self.content_container.clear()
         self.footer_container.clear()
 
-        self._make_header_widgets(current_idx, total)
+        self._make_content_widgets(current_idx, total)
         if slide.get("изображение"):
             self._make_image()
             self._make_slide_content(

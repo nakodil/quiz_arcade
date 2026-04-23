@@ -56,7 +56,11 @@ class SoundManager:
         if not sound:
             return
 
-        player: pyglet.media.Player | None = arcade.play_sound(sound, loop=is_loop)
+        player: pyglet.media.Player | None = arcade.play_sound(
+            sound,
+            loop=is_loop,
+            volume=0.5,
+        )
         if player:
             self.active_players.append(player)
 
@@ -65,3 +69,10 @@ class SoundManager:
         for player in self.active_players:
             arcade.stop_sound(player)
         self.active_players.clear()
+
+    def toggle_mute(self) -> bool:
+        """Переключает состояние звука и возвращает текущее состояние."""
+        self.is_mute = not self.is_mute
+        if self.is_mute:
+            self.stop_all()
+        return self.is_mute
