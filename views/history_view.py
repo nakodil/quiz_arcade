@@ -43,9 +43,18 @@ class HistoryView(BaseView):
         if not self.slides:
             return
 
-        # Передаем данные в макет
+        slide_data = self.slides[self.current_idx]
+
+        # Если ключа "фон" нет, используем дефолтный "history_bg.jpg"
+        new_bg = slide_data.get("фон", "history_bg.jpg")
+
+        # Меняем фон только если он отличается от текущего
+        if self.bg_filename != new_bg:
+            self.update_background(new_bg)
+
+        # Передаем данные в макет (текст, кнопки и т.д.)
         self.layout.render_slide(
-            slide=self.slides[self.current_idx],
+            slide=slide_data,
             current_idx=self.current_idx,
             total=len(self.slides),
         )

@@ -51,9 +51,7 @@ class App(arcade.Window):
     def on_sound_toggle(self) -> None:
         """Коллбэк кнопки ВКЛ/ОТКЛ звука."""
         is_mute = self.player.toggle_mute()
-        if is_mute:
-            self.player.stop_all()
-        else:
+        if not is_mute:
             self.player.play("music", is_loop=True)
 
     def show_menu(self) -> None:

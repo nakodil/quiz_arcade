@@ -13,7 +13,7 @@ class StatisticsView(BaseView):
 
     def __init__(self, data: list) -> None:
         """Инициализирует представление статистики."""
-        super().__init__("statistics_bg.jpg")
+        super().__init__(bg_filename="statistics_bg.jpg")
 
         # Данные: сортировка от новых к старым
         self.data = list(reversed(data))

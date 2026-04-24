@@ -183,12 +183,6 @@ class HistoryLayout(BaseLayout):
         """Полная сборка/перерисовка слайда."""
         self.slide = slide
 
-        # У каждого слайда свой фон
-        bg_filename = slide["фон"]
-        texture_getter = self.callbacks["get texture"]
-        bg_texture = texture_getter(bg_filename)
-        self.setup_background(texture=bg_texture)
-
         # Очищаем контейнеры перед новым вопросом
         self.header_container.clear()
         self.content_container.clear()

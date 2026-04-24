@@ -5,9 +5,8 @@ from pathlib import Path
 
 if getattr(sys, "frozen", False):  # PyInstaller ставит автоматически frozen
     BASE_DIR = Path(getattr(sys, "_MEIPASS", sys.executable)).resolve()
-    # Статистику пишем ВСЕГДА рядом с экзешником
-    ROOT_DIR = Path(sys.executable).parent.resolve()
-else:  # Запущен не из дистрибутива
+    ROOT_DIR = Path(sys.executable).parent.resolve()  # папка, где лежит exe
+else:  # Запущен из папки разработки через консоль
     BASE_DIR = Path(__file__).resolve().parent
     ROOT_DIR = BASE_DIR
 

@@ -22,6 +22,8 @@ desktop.ini
 # Tooling
 ruff.toml
 .ruff_cache/
+*.txt
+*.dot
 
 # Pyinstaller
 build/

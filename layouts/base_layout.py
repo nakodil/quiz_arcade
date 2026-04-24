@@ -7,7 +7,6 @@ import arcade
 import arcade.gui
 
 import config
-from core import utils
 
 BUTTON_STYLE = {
     "normal": arcade.gui.UIFlatButton.UIStyle(
@@ -68,12 +67,8 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             self.callbacks = callbacks
         else:
             self.callbacks = {}
-        self.sound_btn: arcade.gui.UIFlatButton | None = None
-        self.exit_btn: arcade.gui.UIFlatButton | None = None
-
-        # Контейнер фона
-        self.bg_container = arcade.gui.UIAnchorLayout()
-        self.add(self.bg_container)
+        self.sound_btn: arcade.gui.UIFlatButton
+        self.exit_btn: arcade.gui.UIFlatButton
 
         # Размер ?корневого? контейнера
         self.width = size[0]
@@ -169,41 +164,6 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
 
         return btn
 
-    def setup_background(
-            self,
-            texture: arcade.Texture,
-    ) -> None:
-        """Создает фон из слоев.
-
-        Каждый слой - контейнер:
-            1. Слой заливки цветом - оверлей
-            2. Слой изображения
-        """
-        self.bg_container.clear()
-
-        # Изображение
-        scale = utils.get_image_scale(
-            texture.width,
-            texture.height,
-            self.width,
-            self.height,
-        )
-        bg_img = arcade.gui.UIImage(
-            texture=texture,
-            width=self.width,
-            height=self.height,
-            scale=scale,
-        )
-        self.bg_container.add(bg_img)
-
-        # Оверлей (заливка поверх изображения фона)
-        overlay_color = arcade.color.BLACK.replace(a=config.OVERLAY_ALPHA)
-        overlay = arcade.gui.UIWidget(
-            width=self.width,
-            height=self.height,
-        ).with_background(color=overlay_color)
-        self.bg_container.add(overlay)
-
     def make_required_buttons(self) -> None:
         """Создает обязательные кнопки по бокам футера.
 
@@ -232,6 +192,13 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
             anchor_x="right",
             anchor_y="center",
         )
+
+    def sound_btn_update(self, is_mute: bool) -> None:
+        """Меняет текст на кнопке звука."""
+        if not is_mute:
+            self.sound_btn.text = "ВКЛ ЗВУК"
+        else:
+            self.sound_btn.text = "ВЫКЛ ЗВУК"
 
     def debug_layout(self) -> None:
         """Заливает ряды обертки прозрачным цветом."""
