@@ -7,7 +7,7 @@ import arcade
 import arcade.gui
 
 import config
-import utils
+from core import utils
 
 BUTTON_STYLE = {
     "normal": arcade.gui.UIFlatButton.UIStyle(

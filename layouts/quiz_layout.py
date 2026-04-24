@@ -6,7 +6,7 @@ import arcade
 import arcade.gui
 
 import config
-import utils
+from core import utils
 from layouts.base_layout import BaseLayout
 
 

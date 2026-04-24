@@ -5,9 +5,6 @@ from collections.abc import Generator
 import arcade
 
 import config
-import utils
-from core import SoundManager
-from utils import Timer
 from views import (
     FinishView,
     HistoryView,
@@ -16,6 +13,9 @@ from views import (
     QuizView,
     StatisticsView,
 )
+
+from . import utils
+from .sound import SoundManager
 
 
 class App(arcade.Window):
@@ -27,7 +27,7 @@ class App(arcade.Window):
         self.questions = utils.load_json(config.QUESTIONS_JSON)
         self.slides = utils.load_json(config.HISTORY_JSON)
         self.player = SoundManager()
-        self.timer = Timer(config.TIME_LEFT_SEC)  # проксируется в BaseView
+        self.timer = utils.Timer(config.TIME_LEFT_SEC)  # проксируется в BaseView
         self.texture_cache: dict[str, arcade.Texture] = {}
         self.font_cache: dict[str, arcade.Texture] = {}
         self.stats_cache: list[dict] = []  # Кэш для общей статистики
