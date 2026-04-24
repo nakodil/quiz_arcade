@@ -12,10 +12,15 @@ else:  # Запущен не из дистрибутива
     ROOT_DIR = BASE_DIR
 
 ASSETS_DIR = BASE_DIR / "assets"
+DB_DIR = BASE_DIR / "db"
 IMAGE_DIR = ASSETS_DIR / "img"
 FONT_DIR = ASSETS_DIR / "font"
 SOUND_DIR = ASSETS_DIR / "sound"
 STATISTICS_JSON = ROOT_DIR / "statistics.json"
+
+# БД
+QUESTIONS_JSON = DB_DIR / "questions.json"
+HISTORY_JSON = DB_DIR / "history.json"
 
 # Часовой пояс для записи времени в статистику
 TIMEZONE = "Europe/Moscow"
@@ -23,8 +28,8 @@ TIMEZONE = "Europe/Moscow"
 # Название в макете меню
 TITLE = "Викторина о космосе"
 
-# Время на викторину
-TIME_LEFT_SEC = 20
+# Время на викторину в секундах
+TIME_LEFT_SEC = 300
 
 # Статус при завершении викторины
 STATUS =  {
@@ -46,10 +51,14 @@ FONTS = {
 
 # Кегль шрифтов
 FS_XXL = 60
-FS_LARGE = 60
-FS_MEDIUM = 35
-FS_SMALL = 25
-FS_S = 15
+FS_XL = 30
+FS_L = 25
+FS_M = 15
+FS_S = 10
 
 # Прозрачность оверлея над фоном (0-255)
-OVERLAY_ALPHA = 200
+OVERLAY_ALPHA = 220
+
+# Типы файлов
+TEXTURE_FILE_TYPES = {".png", ".jpg", ".jpeg"}
+FONT_FILE_TYPES = {".ttf"}

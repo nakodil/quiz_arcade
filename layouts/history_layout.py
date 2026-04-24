@@ -33,7 +33,7 @@ class HistoryLayout(BaseLayout):
         title_lbl = self.create_label(
             text=self.slide["заголовок"],
             font="title",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_XL,
         )
         self.header_container.add(
             title_lbl,
@@ -45,7 +45,7 @@ class HistoryLayout(BaseLayout):
         self.lbl_counter = self.create_label(
             f"{current_idx + 1} / {total}",
             font="mono",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_L,
         )
         self.header_container.add(
             self.lbl_counter,
@@ -72,7 +72,7 @@ class HistoryLayout(BaseLayout):
         )
 
         # Изображение
-        imgage_filename = self.slide["изображение"]  # DRY: дальше такая же логика, как в QuizView
+        imgage_filename = self.slide["изображение"]  # DRY: все как в QuizView
         texture_getter = self.callbacks["get texture"]
         texture = texture_getter(imgage_filename)
         image_max_w = round(self.width * 0.5 - self.padding_hor * 2)
@@ -122,7 +122,7 @@ class HistoryLayout(BaseLayout):
             text=self.slide["тема"],
             width=text_width,
             multiline=True,
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_L,
         )
         data_container.add(topic_lbl)
 
@@ -131,7 +131,7 @@ class HistoryLayout(BaseLayout):
             text=self.slide["текст"],
             width=text_width,
             multiline=True,
-            font_size=config.FS_SMALL,
+            font_size=config.FS_M,
         )
         data_container.add(text_lbl)
 

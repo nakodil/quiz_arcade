@@ -34,7 +34,6 @@ class StatisticsView(BaseView):
         self.layout = StatisticsLayout(
             size=(self.window.width, self.window.height),
             callbacks=self.callbacks,
-            avg_stats=self.avg_stats,
         )
         self.setup_layout(self.layout)
         self._update_display()

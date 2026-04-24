@@ -1,6 +1,7 @@
 """Модуль базового макета."""
 
 from collections.abc import Callable
+from typing import Any
 
 import arcade
 import arcade.gui
@@ -133,9 +134,9 @@ class BaseLayout(arcade.gui.UIAnchorLayout):
     def create_label(
             self,
             text: str = "",
-            font_size: int = config.FS_SMALL,
+            font_size: int = config.FS_M,
             font: str = "text",
-            **kwargs,
+            **kwargs: Any,  # noqa: ANN401
     ) -> arcade.gui.UILabel:
         """Фабрика создания текстов для всех макетов."""
         return arcade.gui.UILabel(

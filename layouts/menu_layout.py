@@ -30,7 +30,7 @@ class MenuLayout(BaseLayout):
         title = self.create_label(
             text=config.TITLE,
             font="main",
-            font_size=config.FS_LARGE,
+            font_size=config.FS_XXL,
         )
         self.content_container.add(
             title,

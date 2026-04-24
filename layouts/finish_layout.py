@@ -1,7 +1,5 @@
 """Модуль макета экрана завершения."""
 
-from collections.abc import Callable
-
 import arcade.gui
 
 import config
@@ -24,6 +22,8 @@ class FinishLayout(BaseLayout):
             propotrions=(0.1, 0.8, 0.1),
             callbacks=callbacks,
         )
+        if not statistics:
+            statistics = {}
         self._setup_ui(statistics)
 
     def _setup_ui(self, statistics: dict) -> None:
@@ -32,7 +32,7 @@ class FinishLayout(BaseLayout):
         title = self.create_label(
             status_formatted,
             font="title",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_XL,
         )
         self.header_container.add(title, anchor_x="center", anchor_y="center")
 
@@ -42,11 +42,13 @@ class FinishLayout(BaseLayout):
             if key == "статус":
                 continue   # в послендем - статус, он уже есть в хедере
             if key == "потрачено":
-                value = utils.get_formatted_time(value)
-            row_text = f"{key}: {value}"
+                value_formatted = utils.get_formatted_time(value)
+                row_text = f"{key}: {value_formatted}"
+            else:
+                row_text = f"{key}: {value}"
             row = self.create_label(
                 row_text,
-                font_size=config.FS_SMALL,
+                font_size=config.FS_M,
             )
             vbox.add(row)
         self.content_container.add(

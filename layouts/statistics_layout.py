@@ -16,7 +16,6 @@ class StatisticsLayout(BaseLayout):
             self,
             size: tuple[int, int],
             callbacks: dict[str, Callable],
-            avg_stats: dict,
     ) -> None:
         """Инициализирует макет статистики."""
         super().__init__(
@@ -45,7 +44,7 @@ class StatisticsLayout(BaseLayout):
         title = self.create_label(
             "Статистика",
             font="title",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_XL,
         )
         header_vbox.add(title)
 
@@ -59,7 +58,7 @@ class StatisticsLayout(BaseLayout):
             )
             stats_label = self.create_label(
                 stats_text,
-                font_size=config.FS_SMALL,
+                font_size=config.FS_M,
             )
             header_vbox.add(stats_label)
 
@@ -69,7 +68,7 @@ class StatisticsLayout(BaseLayout):
         # Порядковый номер страницы
         page_info = self.create_label(
             f"{page_num + 1} / {total_pages}",
-            font_size=config.FS_SMALL,
+            font_size=config.FS_M,
         )
         self.header_container.add(
             page_info,
@@ -83,7 +82,7 @@ class StatisticsLayout(BaseLayout):
         if not records:
             empty_lbl = self.create_label(
                 "Статистики пока нет. Пройдите викторину первым;)",
-                font_size=config.FS_SMALL,
+                font_size=config.FS_L,
             )
             vbox.add(empty_lbl)
         else:
@@ -141,4 +140,4 @@ class StatisticsLayout(BaseLayout):
             f"{num:02}. | {dt} | ✔{correct} | ❌{incorrect} | "
             f"{time_spent}⏳ | {status}"
         )
-        return self.create_label(text=text, font_size=config.FS_SMALL)
+        return self.create_label(text=text, font_size=config.FS_M)

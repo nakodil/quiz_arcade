@@ -44,7 +44,7 @@ class QuizLayout(BaseLayout):
         self.lbl_counter = self.create_label(
             f"{current_idx + 1} / {total}",
             font="mono",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_L,
         )
         self.header_container.add(
             self.lbl_counter,
@@ -56,7 +56,7 @@ class QuizLayout(BaseLayout):
         self.lbl_timer = self.create_label(
             "",
             font="mono",
-            font_size=config.FS_MEDIUM,
+            font_size=config.FS_L,
         )
         self.header_container.add(
             self.lbl_timer,
@@ -131,7 +131,7 @@ class QuizLayout(BaseLayout):
             text=self.question["текст"],
             width=text_width,
             multiline=True,
-            font_size=config.FS_SMALL,
+            font_size=config.FS_M,
         )
         question_container.add(text_lbl)
 
@@ -140,7 +140,7 @@ class QuizLayout(BaseLayout):
                 text=f"{letter}. {text}",
                 width=text_width,
                 multiline=True,
-                font_size=config.FS_SMALL,
+                font_size=config.FS_M,
             )
             question_container.add(option_lbl)
 
